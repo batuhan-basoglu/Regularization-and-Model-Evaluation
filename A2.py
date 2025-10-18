@@ -94,7 +94,6 @@ class GaussianRegression:
     def __init__(self, sigma=1.0):
         self.sigma = sigma
         self.weights = None
-        self.mus = None
         self.D = None
     
     def fit(self, x_train, y_train, D):
