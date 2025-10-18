@@ -55,7 +55,7 @@ def gaussian_features(x, D, sigma=1.0):
     features = np.ones((len(x), D + 1))  # with bias term
     
     for i, mu in enumerate(mu_i):
-        features[:, i+1] = gaussian_basis(x, mu, sigma)
+        features[:, i+1] = gaussian_basis(x, mu, sigma).flatten() 
     
     return features
 
@@ -120,14 +120,14 @@ def true_function(x):
     return np.log(x + 1) * np.cos(x) + np.sin(2*x)
 
 # fit models with different numbers of basis functions and plot
-D_i = [0, 2, 5, 10, 13, 15, 17, 20, 25, 30, 35, 45]
+D_values = [0, 5, 10, 13, 15, 17, 20, 25, 30, 45]
 x_plot = np.linspace(0, 10, 300) 
 
-plt.figure(figsize=(18, 12))
+plt.figure(figsize=(20, 8))
 
-for i, D in enumerate(D_i):
-    plt.subplot(4, 3, i+1)
-    
+for i, D in enumerate(D_values):
+    plt.subplot(2, 5, i+1)
+
     # Create new model for each D value, fit and get predictions 
     model = GaussianRegression(sigma=1.0)
     model.fit(x, y_noisy, D)
