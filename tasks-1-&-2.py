@@ -8,6 +8,14 @@ warnings.filterwarnings('ignore')
 np.random.seed(2)
 
 #__________________________________________________________________________________
+def true_function(x):
+    #return (np.sin(x) + 0.5 * np.cos(3*x) +  0.25 * np.sin(7*x))
+    #return np.exp(-0.1 * (x - 5)**2) * np.sin(4 * x)
+    #return np.piecewise(x,[x < 4, x >= 4], [lambda x: np.sin(2*x), lambda x: 0.5 * x-3]) 
+    return np.log(x + 1) * np.cos(x) + np.sin(2*x)
+    
+    
+    
 #Task 1
 #1.1
 def generate_data(n_samples=100, noise_std=1.0):
@@ -16,7 +24,8 @@ def generate_data(n_samples=100, noise_std=1.0):
     x = np.linspace(0, 10, n_samples)
     
     #y values without noise
-    y_clean = np.log(x + 1) * np.cos(x) + np.sin(2*x)
+    #y_clean = np.log(x + 1) * np.cos(x) + np.sin(2*x)
+    y_clean = true_function(x)
     
     #noise
     noise = np.random.normal(0, noise_std, n_samples)
@@ -28,11 +37,12 @@ def generate_data(n_samples=100, noise_std=1.0):
 x, y_clean, y_noisy = generate_data(100)
 
 # Plot clean and noisy data
-plt.plot(x, y_clean, 'b-', label='Clean Data', linewidth=2)
-plt.plot(x, y_noisy, 'ro', label='Noisy Data', alpha=0.6, markersize=4)
+plt.figure(figsize=(12, 3))
+plt.plot(x, y_clean, 'b-', label='clean data', linewidth=2)
+plt.plot(x, y_noisy, 'ro', label='noisy data', alpha=0.6, markersize=4)
 plt.xlabel('x')
 plt.ylabel('y')
-plt.title('Clean vs Noisy Data')
+plt.title('Clean vs noisy data')
 plt.legend()
 plt.grid(True, alpha=0.3)
 plt.savefig('results/task1-data-generation.png')
@@ -82,9 +92,9 @@ for i, D in enumerate(D_values_to_plot, 1):
         phi = gaussian_basis(x_plot, mu)
         plt.plot(x_plot, phi, alpha=0.7)
     
-    plt.title(f'Gaussian Basis Functions (D={D})')
+    plt.title(f'Gaussian basis functions (D={D})')
     plt.xlabel('x')
-    plt.ylabel(r'$\phi(x)$')
+    plt.ylabel('$\phi(x)$')
     plt.grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -119,10 +129,8 @@ class GaussianRegression:
         
         return yh
     
-    
 
-def true_function(x):
-    return np.log(x + 1) * np.cos(x) + np.sin(2*x)
+
 
 # fit models with different numbers of basis functions and plot
 D_values = [0, 5, 10, 13, 15, 17, 20, 25, 30, 45]
@@ -142,19 +150,20 @@ for i, D in enumerate(D_values):
     y_hat = y_hat.flatten() if y_hat.ndim > 1 else y_hat
     
     # Plot
-    plt.plot(x_plot, true_function(x_plot), 'b-', label='True Function', linewidth=2, alpha=0.7)
-    plt.plot(x, y_noisy, 'ro', label='Noisy Data', alpha=0.4, markersize=3)
+    plt.plot(x_plot, true_function(x_plot), 'b-', label='True function', linewidth=2, alpha=0.7)
+    plt.plot(x, y_noisy, 'ro', label='Noisy data', alpha=0.4, markersize=3)
     plt.plot(x_plot, y_hat, 'g-', label=f'Fitted (D={D})', linewidth=2)
     
-    plt.ylim(-6, 6)
+    plt.ylim(-4.2, 4.2)
     plt.title(f'D = {D}')
     plt.grid(True, alpha=0.3)
-    plt.legend(fontsize=8)
+    if D == 0:
+        plt.legend(fontsize=8)
 
     # x and y labels
-    if i % 3 == 0:  
+    if i % 5 == 0:  
         plt.ylabel('y')
-    if i >= 9:  
+    if i >= 5:  
         plt.xlabel('x')
 
 plt.tight_layout()
@@ -201,14 +210,14 @@ print(f"Optimal D on single split = {optimal_D}")
 
 
 # Plot training and validation SSE vs D for this single split
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(12, 3))
 plt.plot(D_values, train_sse, 'b-', label='Train SSE', linewidth=2, marker='o', markersize=4)
 plt.plot(D_values, val_sse, 'r-', label='Validation SSE', linewidth=2, marker='s', markersize=4)
 plt.axvline(x=optimal_D, color='g', linestyle='--', label=f'Optimal D = {optimal_D}')
 #plt.scatter([optimal_D], [val_sse[optimal_D]], label=f"Opt D = {optimal_D}", zorder=5)
-plt.xlabel('Number of Gaussian bases (D)')
+plt.xlabel('Number of gaussian bases (D)')
 plt.ylabel('Sum of Squared Errors (SSE)')
-plt.title('Train and Validation SSE vs D (single split)')
+plt.title('Train and validation SSE vs D (single split)')
 plt.legend()
 plt.grid(True, alpha=0.3)
 plt.yscale('log') 
@@ -216,18 +225,19 @@ plt.savefig('results/task1-model-selection-single-split.png')
 
 
 # plot optimal model fit
-plt.figure(figsize=(10, 4))
+plt.figure(figsize=(10, 3))
 optimal_model = GaussianRegression(sigma=1.0)
 yh_opt = optimal_model.fit(x_train, y_train, optimal_D)
 yh_opt = optimal_model.predict(x_plot)
 
-plt.plot(x_plot, true_function(x_plot), 'b-', label='True Function', linewidth=2)
-plt.plot(x_train, y_train, 'bo', label='Training Data', alpha=0.6, markersize=4)
-plt.plot(x_val, y_val, 'ro', label='Validation Data', alpha=0.6, markersize=4)
+plt.plot(x_plot, true_function(x_plot), 'b-', label='true function', linewidth=2)
+plt.plot(x_train, y_train, 'bo', label='Training data', alpha=0.6, markersize=4)
+plt.plot(x_val, y_val, 'ro', label='validation data', alpha=0.6, markersize=4)
 plt.plot(x_plot, yh_opt, 'g-', label=f'Optimal Model (D={optimal_D})', linewidth=2)
-plt.ylim(-6, 6)
-plt.title(f'Optimal Model with {optimal_D} Gaussian Basis Functions')
+plt.ylim(-5, 5)
+plt.title(f'Optimal model with {optimal_D} gaussian basis functions')
 plt.ylabel('y')
+plt.xlabel('x')
 plt.legend()
 plt.grid(True, alpha=0.3)
 
@@ -256,7 +266,15 @@ for rep in range(n_repetitions):
 
     for D_i, D in enumerate(D_values):
         # fit model
-        model = GaussianRegression(sigma=1.0)
+        '''
+        if D > 10:
+            sigma = (x.max() - x.min()) / D
+        else: 
+            sigma = 1
+        '''
+        sigma = 1
+        model = GaussianRegression(sigma)
+        #model = GaussianRegression(sigma=1.0)
         model.fit(x_train, y_train, D) 
 
         # predict on both sets 
@@ -288,7 +306,7 @@ for D_i, D in enumerate(D_values):
             ax.plot(x, predictions[rep, D_i, :], color='green', alpha=0.3, linewidth=1)
     
     # plot true function
-    ax.plot(x, true_function(x), 'b-', linewidth=3, label='True Function')
+    ax.plot(x, true_function(x), 'b-', linewidth=3, label='true function')
     
     #plot average prediction
     valid_predictions = [predictions[rep, D_i, :] 
@@ -297,9 +315,9 @@ for D_i, D in enumerate(D_values):
     
     if valid_predictions:
         avg_prediction = np.mean(valid_predictions, axis=0)
-        ax.plot(x, avg_prediction, 'r-', linewidth=2, label='Average Prediction')
+        ax.plot(x, avg_prediction, 'r-', linewidth=2, label='Average prediction')
     
-    ax.set_title(f'D = {D} Gaussian Bases')
+    ax.set_title(f'D = {D}')
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_ylim(-4, 4)
@@ -309,13 +327,11 @@ for D_i, D in enumerate(D_values):
         ax.legend()
 
 plt.tight_layout()
-plt.suptitle('Bias-Variance tradeoff with 10 different fits', 
-             fontsize=16, y=1.02)
+plt.suptitle('Bias-Variance tradeoff with 10 different fits', fontsize=16, y=1.02)
 plt.savefig('results/task2-plotting-multiple-fits.png')
 
-
 # Plot 2: average training and test errors
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(12, 4))
 
 # Compute mean and std
 avg_train_errors = np.mean(train_errs, axis=0)
@@ -328,36 +344,11 @@ std_test_errors = np.std(test_errs, axis=0)
 plt.errorbar(D_values, avg_train_errors, yerr=std_train_errors, label='Average Training Error', marker='o', capsize=5, linewidth=2)
 plt.errorbar(D_values, avg_test_errors, yerr=std_test_errors, label='Average Test Error', marker='s', capsize=5, linewidth=2)
 
-plt.xlabel('Number of Gaussian Basis Functions (D)')
+plt.xlabel('number of gaussian basis functions (D)')
 plt.ylabel('Mean Squared Error')
-plt.title('Average Training and Test Errors Across 10 Repetitions')
+plt.title('Average training and test errors across 10 repetitions')
 plt.legend()
 plt.grid(True, alpha=0.3)
 plt.yscale('log')
 plt.xticks(D_values)
 plt.savefig('results/task2-plotting-train-and-test-errors.png')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
